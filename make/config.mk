@@ -14,7 +14,7 @@ C_AGENT_ROOT := $(abspath $(THISDIR)/..)
 include $(C_AGENT_ROOT)/vendor/newrelic/make/config.mk
 
 C_AGENT_CPPFLAGS := $(PLATFORM_DEFS)
-C_AGENT_CPPFLAGS += -I$(C_AGENT_ROOT)/vendor/newrelic/axiom -I$(C_AGENT_ROOT)/include
+C_AGENT_CPPFLAGS += "-I$(C_AGENT_ROOT)/vendor/newrelic/axiom" "-I$(C_AGENT_ROOT)/include"
 
 C_AGENT_CFLAGS := -std=gnu99 -fPIC -DPIC -pthread
 C_AGENT_CFLAGS += -Wall

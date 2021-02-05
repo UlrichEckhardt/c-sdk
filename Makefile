@@ -21,7 +21,7 @@ include make/config.mk
 # Set up the appropriate flags for cmocka, since we use that for unit tests.
 #
 CMOCKA_LIB = $(C_AGENT_ROOT)/vendor/cmocka/build/src/libcmocka.a
-CMOCKA_INCLUDE = -I$(C_AGENT_ROOT)/vendor/cmocka/include
+CMOCKA_INCLUDE = "-I$(C_AGENT_ROOT)/vendor/cmocka/include"
 
 export CMOCKA_LIB
 export CMOCKA_INCLUDE
