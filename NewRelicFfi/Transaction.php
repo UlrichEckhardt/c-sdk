@@ -27,8 +27,9 @@ class Transaction
 
     /**
      * C-API `newrelic_txn_t*`
+     * @internal
      */
-    private ?FFI\CData $txn;
+    public ?FFI\CData $txn;
 
     protected function __construct(App $app, FFI\CData $txn)
     {
@@ -77,6 +78,11 @@ class Transaction
         }
         // Note: newrelic_notice_error() only logs errors but returns `void`
         $this->ffi->newrelic_notice_error($this->txn, $priority, $errMsg, $errClass);
+    }
+
+    public function startSegment(string $name, string $category): Segment
+    {
+        return new Segment($this, $name, $category);
     }
 
     public function ignore(): void
