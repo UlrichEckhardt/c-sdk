@@ -36,4 +36,14 @@ class App
             // throw new Exception('newrelic_destroy_app() failed');
         }
     }
+
+    public function startWebTransaction(string $name): Transaction
+    {
+        return new WebTransaction($this, $name);
+    }
+
+    public function startNonWebTransaction(string $name): Transaction
+    {
+        return new NonWebTransaction($this, $name);
+    }
 }
