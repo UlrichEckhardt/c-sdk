@@ -28,7 +28,7 @@ class Transaction
     /**
      * C-API `newrelic_txn_t*`
      */
-    private FFI\CData $txn;
+    private ?FFI\CData $txn;
 
     protected function __construct(App $app, FFI\CData $txn)
     {
@@ -38,6 +38,9 @@ class Transaction
 
     public function setName(string $name): void
     {
+        if ($this->txn === null) {
+            throw new Exception('transaction already ended');
+        }
         if (!$this->ffi->newrelic_set_transaction_name($this->txn, $name)) {
             throw new Exception('newrelic_set_transaction_name() failed');
         }
@@ -69,12 +72,18 @@ class Transaction
 
     public function noticeError(int $priority, string $errMsg, string $errClass): void
     {
+        if ($this->txn === null) {
+            throw new Exception('transaction already ended');
+        }
         // Note: newrelic_notice_error() only logs errors but returns `void`
         $this->ffi->newrelic_notice_error($this->txn, $priority, $errMsg, $errClass);
     }
 
     public function ignore(): void
     {
+        if ($this->txn === null) {
+            throw new Exception('transaction already ended');
+        }
         if (!$this->ffi->newrelic_ignore_transaction($this->txn)) {
             throw new Exception('newrelic_ignore_transaction() failed');
         }
@@ -88,6 +97,7 @@ class Transaction
         if (!$this->ffi->newrelic_end_transaction(FFI::addr($this->txn))) {
             throw new Exception('newrelic_end_transaction() failed');
         }
+        $this->txn = null;
     }
 
     public function __destruct()
