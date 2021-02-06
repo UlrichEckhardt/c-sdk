@@ -53,12 +53,20 @@ $ffi = FFI::cdef(
     "typedef struct _newrelic_app_t newrelic_app_t;\n" .
     "typedef struct _newrelic_txn_t newrelic_txn_t;\n" .
     "typedef struct _newrelic_segment_t newrelic_segment_t;\n" .
+    "typedef enum _newrelic_loglevel_t {\n" .
+    "    NEWRELIC_LOG_ERROR,\n" .
+    "    NEWRELIC_LOG_WARNING,\n" .
+    "    NEWRELIC_LOG_INFO,\n" .
+    "    NEWRELIC_LOG_DEBUG,\n" .
+    "} newrelic_loglevel_t;\n" .
     "newrelic_app_config_t* newrelic_create_app_config(const char* app_name, const char* license_key);\n" .
     "bool newrelic_destroy_app_config(newrelic_app_config_t** config);\n" .
+    "bool newrelic_configure_log(const char* filename, newrelic_loglevel_t level);\n" .
     "bool newrelic_init(const char* daemon_socket, int time_limit_ms);\n" .
     "newrelic_app_t* newrelic_create_app(const newrelic_app_config_t* config, unsigned short timeout_ms);" .
     "bool newrelic_destroy_app(newrelic_app_t** app);\n" .
     "newrelic_txn_t* newrelic_start_web_transaction(newrelic_app_t* app, const char* name);\n" .
+    "newrelic_txn_t* newrelic_start_non_web_transaction(newrelic_app_t* app, const char* name);\n" .
     "bool newrelic_end_transaction(newrelic_txn_t** transaction_ptr);\n" .
     "newrelic_segment_t* newrelic_start_segment(newrelic_txn_t* transaction, const char* name, const char* category);\n" .
     "bool newrelic_end_segment(newrelic_txn_t* transaction, newrelic_segment_t** segment_ptr);\n",
@@ -77,6 +85,9 @@ echo "created app config\n";
 var_dump($config);
 
 
+if (!$ffi->newrelic_configure_log("stdout", $ffi->NEWRELIC_LOG_DEBUG)) {
+    throw new Exception('newrelic_configure_log() failed');
+}
 
 // If this fails, run the daemon using:
 //    newrelic-daemon --loglevel debug --foreground --address /tmp/.newrelic.sock
@@ -107,15 +118,23 @@ if (!$ffi->newrelic_destroy_app_config(FFI::addr($config))) {
 }
 echo "released app config\n";
 
-//     newrelic_txn_t* txn;
-//     /* Start a web transaction and a segment */
-//     txn = newrelic_start_web_transaction(app, "Transaction name");
-//     seg = newrelic_start_segment(txn, "Segment name", "Custom");
-$txn = $ffi->newrelic_start_web_transaction($app, "FFI Transaction");
-if ($txn === null) {
-    throw new Exception('newrelic_start_web_transaction() failed');
+if (false) {
+    //     newrelic_txn_t* txn;
+    //     /* Start a web transaction and a segment */
+    //     txn = newrelic_start_web_transaction(app, "Transaction name");
+    //     seg = newrelic_start_segment(txn, "Segment name", "Custom");
+    $txn = $ffi->newrelic_start_web_transaction($app, "FFI/Transaction");
+    if ($txn === null) {
+        throw new Exception('newrelic_start_web_transaction() failed');
+    }
+    echo "started web transaction\n";
+} else {
+    $txn = $ffi->newrelic_start_non_web_transaction($app, "FFI/Transaction");
+    if ($txn === null) {
+        throw new Exception('newrelic_start_non_web_transaction() failed');
+    }
+    echo "started non-web transaction\n";
 }
-echo "started web transaction\n";
 
 //     seg = newrelic_start_segment(txn, "Segment name", "Custom");
 $seg = $ffi->newrelic_start_segment($txn, "Segment name", "Custom");
@@ -136,7 +155,7 @@ if (!$ffi->newrelic_end_segment($txn, FFI::addr($seg))) {
 if (!$ffi->newrelic_end_transaction(FFI::addr($txn))) {
     throw new Exception('newrelic_end_transaction() failed');
 }
-echo "finished web transaction\n";
+echo "finished transaction\n";
 
 sleep(10);
 
