@@ -26,6 +26,11 @@ class AppConfig
         $this->config = $config;
     }
 
+    public function setDistributedTracingEnabled(bool $enabled): void
+    {
+        $this->config->distributed_tracing->enabled = $enabled;
+    }
+
     public function __destruct()
     {
         if ($this->config === null) {
