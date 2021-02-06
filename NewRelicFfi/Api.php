@@ -42,6 +42,9 @@ EOT;
         if (!extension_loaded('FFI')) {
             throw new Exception('FFI extension not loaded');
         }
+        if (!file_exists($libraryPath)) {
+            throw new Exception('the given library does not exist');
+        }
         $this->ffi = FFI::cdef(self::C_DECLARATION, $libraryPath);
     }
 
