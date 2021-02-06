@@ -10,7 +10,10 @@ class AppConfig
     /** @internal */
     public FFI $ffi;
 
-    /** @internal */
+    /**
+     * C-API `newrelic_app_config_t*`
+     * @internal
+     */
     public FFI\CData $config;
 
     public function __construct(Api $api, string $appName, string $licenceKey)
@@ -32,5 +35,13 @@ class AppConfig
             // TODO: signal failure without throwing an exception
             // throw new Exception('newrelic_destroy_app_config() failed');
         }
+    }
+
+    /**
+     * factory function to create an app
+     */
+    public function createApp(int $timeoutMs): App
+    {
+        return new App($this, $timeoutMs);
     }
 }
