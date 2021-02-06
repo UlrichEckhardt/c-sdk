@@ -28,6 +28,37 @@ class Segment
         }
     }
 
+    public function createDistributedTracePayload(): string
+    {
+        if ($this->seg === null) {
+            throw new Exception('segment already ended');
+        }
+        $payload = $this->txn->ffi->newrelic_create_distributed_trace_payload(
+            $this->txn->txn,
+            $this->seg
+        );
+        if ($payload === null) {
+            throw new Exception('newrelic_create_distributed_trace_payload() failed');
+        }
+        $res = FFI::string($payload);
+        FFI::free($payload);
+        return $res;
+    }
+
+    public function acceptDistributedTracePayload(string $payload, string $transportType): void
+    {
+        if ($this->seg === null) {
+            throw new Exception('segment already ended');
+        }
+        if (!$this->txn->ffi->newrelic_accept_distributed_trace_payload(
+            $this->txn->txn,
+            $payload,
+            $transportType
+        )) {
+            throw new Exception('newrelic_accept_distributed_trace_payload() failed');
+        }
+    }
+
     public function end(): void
     {
         if ($this->seg === null) {
