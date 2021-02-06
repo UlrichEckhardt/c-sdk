@@ -21,17 +21,21 @@ typedef enum _newrelic_loglevel_t {
     NEWRELIC_LOG_INFO,
     NEWRELIC_LOG_DEBUG,
 } newrelic_loglevel_t;
+bool newrelic_add_attribute_double(newrelic_txn_t* transaction, const char* key, const double value);
+bool newrelic_add_attribute_int(newrelic_txn_t* transaction, const char* key, const int value);
+bool newrelic_add_attribute_string(newrelic_txn_t* transaction, const char* key, const char* value);
 newrelic_app_config_t* newrelic_create_app_config(const char* app_name, const char* license_key);
-bool newrelic_destroy_app_config(newrelic_app_config_t** config);
 bool newrelic_configure_log(const char* filename, newrelic_loglevel_t level);
-bool newrelic_init(const char* daemon_socket, int time_limit_ms);
 newrelic_app_t* newrelic_create_app(const newrelic_app_config_t* config, unsigned short timeout_ms);
 bool newrelic_destroy_app(newrelic_app_t** app);
-newrelic_txn_t* newrelic_start_web_transaction(newrelic_app_t* app, const char* name);
-newrelic_txn_t* newrelic_start_non_web_transaction(newrelic_app_t* app, const char* name);
-bool newrelic_end_transaction(newrelic_txn_t** transaction_ptr);
-newrelic_segment_t* newrelic_start_segment(newrelic_txn_t* transaction, const char* name, const char* category);
+bool newrelic_destroy_app_config(newrelic_app_config_t** config);
 bool newrelic_end_segment(newrelic_txn_t* transaction, newrelic_segment_t** segment_ptr);
+bool newrelic_end_transaction(newrelic_txn_t** transaction_ptr);
+bool newrelic_init(const char* daemon_socket, int time_limit_ms);
+void newrelic_notice_error(newrelic_txn_t* transaction, int priority, const char* errmsg, const char* errclass);
+newrelic_txn_t* newrelic_start_non_web_transaction(newrelic_app_t* app, const char* name);
+newrelic_segment_t* newrelic_start_segment(newrelic_txn_t* transaction, const char* name, const char* category);
+newrelic_txn_t* newrelic_start_web_transaction(newrelic_app_t* app, const char* name);
 const char* newrelic_version(void);
 EOT;
 
