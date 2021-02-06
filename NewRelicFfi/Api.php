@@ -78,4 +78,12 @@ EOT;
             throw new Exception('newrelic_init() failed');
         }
     }
+
+    /**
+     * factory function to create a configuration
+     */
+    public function createConfig(string $appName, string $licenceKey): AppConfig
+    {
+        return new AppConfig($this, $appName, $licenceKey);
+    }
 }
