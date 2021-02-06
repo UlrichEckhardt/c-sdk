@@ -35,7 +35,8 @@ bool newrelic_end_segment(newrelic_txn_t* transaction, newrelic_segment_t** segm
 const char* newrelic_version(void);
 EOT;
 
-    private FFI $ffi;
+    /** @internal */
+    public FFI $ffi;
 
     public function __construct(string $libraryPath)
     {
@@ -52,5 +53,29 @@ EOT;
     {
         $version = $this->ffi->newrelic_version();
         return $version;
+    }
+
+    public function configureLog(string $filename, string $level): void
+    {
+        $nrLevel = $this->ffi->{'NEWRELIC_LOG_' . $level};
+        if (!$this->ffi->newrelic_configure_log($filename, $nrLevel)) {
+            throw new Exception('newrelic_configure_log() failed');
+        }
+    }
+
+    // If this fails, there are two reasons:
+    // 1. You need to run the daemon using:
+    //    newrelic-daemon --loglevel debug --foreground --address /tmp/.newrelic.sock
+    // 2. You tried to call this a second time after it was called either explicitly
+    //    or implicitly.
+    public function init(?string $daemonSocket, int $timeLimitMs): void
+    {
+        //     if (!newrelic_init(NULL, 0)) {
+        //       printf("Error connecting to daemon.\n");
+        //       return -1;
+        //     }
+        if (!$this->ffi->newrelic_init($daemonSocket, $timeLimitMs)) {
+            throw new Exception('newrelic_init() failed');
+        }
     }
 }
