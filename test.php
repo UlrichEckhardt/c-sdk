@@ -47,6 +47,38 @@
 //     return 0;
 // }
 
+require_once __DIR__ . '/NewRelicFfi/Api.php';
+require_once __DIR__ . '/NewRelicFfi/App.php';
+require_once __DIR__ . '/NewRelicFfi/AppConfig.php';
+require_once __DIR__ . '/NewRelicFfi/Transaction.php';
+require_once __DIR__ . '/NewRelicFfi/NonWebTransaction.php';
+require_once __DIR__ . '/NewRelicFfi/WebTransaction.php';
+require_once __DIR__ . '/NewRelicFfi/Segment.php';
+
+use NewRelicFfi\Api;
+
+$api = new Api(__DIR__ . '/libnewrelic.so');
+echo $api->getVersion() . PHP_EOL;
+$api->configureLog('stdout', 'DEBUG');
+$api->init(null, 1000);
+
+$config = $api->createConfig("BAPI AY Staging", "");
+$config->setDistributedTracingEnabled(true);
+$app = $config->createApp(2000);
+
+$txn = $app->startWebTransaction('FFI/Transaction');
+$txn->addAttribute('created by', 'FFI-driver');
+$txn->addAttribute('version', 0);
+$txn->addAttribute('tau', 6.28);
+sleep(1);
+$seg = $txn->startSegment('Segment name', 'Custom');
+sleep(1);
+$payload = $seg->createDistributedTracePayload();
+echo base64_encode($payload) . PHP_EOL;
+$seg->end();
+sleep(1);
+$txn->end();
+die();
 
 $ffi = FFI::cdef(
     "typedef struct _newrelic_app_config_t newrelic_app_config_t;\n" .
